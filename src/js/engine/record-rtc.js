@@ -144,10 +144,6 @@ class RecordRTCEngine extends RecordEngine {
         }
     }
 
-    getSeekable(blob, callback) {
-        getSeekableBlob(blob, callback);
-    }
-
     /**
      * Invoked when recording is stopped and resulting stream is available.
      *
@@ -162,6 +158,7 @@ class RecordRTCEngine extends RecordEngine {
 
         // store reference to recorded stream data
         let recordType = this.player().record().getRecordType();
+        let options = this.player().record().pluginLibraryOptions;
         this.engine.getBlob((recording) => {
             switch (recordType) {
                 case AUDIO_ONLY:
@@ -189,8 +186,15 @@ class RecordRTCEngine extends RecordEngine {
             }
             // inject file info
             this.addFileInfo(this.recordedData);
-            // notify listeners
-            this.trigger(Event.RECORD_COMPLETE);
+
+            if (options && options.seekable && window['getSeekableBlob']){
+                getSeekableBlob(this.recordedData, function(blob){
+                    this.recordedData = blob;
+                    this.trigger(Event.RECORD_COMPLETE);
+                });
+            } else {
+                this.trigger(Event.RECORD_COMPLETE);
+            }
         });
     }
 
