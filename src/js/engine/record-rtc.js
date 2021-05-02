@@ -159,6 +159,7 @@ class RecordRTCEngine extends RecordEngine {
         // store reference to recorded stream data
         let recordType = this.player().record().getRecordType();
         let options = this.player().record().pluginLibraryOptions;
+        const _that = this;
         this.engine.getBlob((recording) => {
             switch (recordType) {
                 case AUDIO_ONLY:
@@ -188,9 +189,9 @@ class RecordRTCEngine extends RecordEngine {
             this.addFileInfo(this.recordedData);
 
             if (options && options.seekable && window['getSeekableBlob']){
-                getSeekableBlob(this.recordedData, function(blob){
-                    this.recordedData = blob;
-                    this.trigger(Event.RECORD_COMPLETE);
+                getSeekableBlob(this.recordedData, (blob)=> {
+                    _that.recordedData = blob;
+                    _that.trigger(Event.RECORD_COMPLETE);
                 });
             } else {
                 this.trigger(Event.RECORD_COMPLETE);
